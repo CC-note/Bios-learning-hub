@@ -1,0 +1,577 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BIOS 0→1 Learning Hub</title><style>
+
+:root{
+  --bg:#f7f8fb; --surface:rgba(255,255,255,.86); --card:#ffffff; --ink:#111827;
+  --muted:#6b7280; --line:#e7eaf0; --primary:#5b5cf0; --primary2:#7c3aed;
+  --soft:#f0efff; --green:#16a34a; --amber:#f59e0b; --red:#ef4444;
+  --shadow:0 12px 34px rgba(30,41,59,.08); --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+radial-gradient(circle at 15% 0%,rgba(91,92,240,.08),transparent 28%),
+radial-gradient(circle at 90% 10%,rgba(124,58,237,.07),transparent 24%),var(--bg);
+color:var(--ink);font-family:Inter,"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif}
+body.dark{--bg:#0b1020;--surface:rgba(18,25,44,.9);--card:#12192c;--ink:#f7f8fb;--muted:#9ba6b7;--line:#26324a;--soft:#1d2045;--shadow:none}
+button,input,select{font:inherit}
+header{height:72px;background:var(--surface);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);
+display:flex;align-items:center;gap:18px;padding:0 24px;position:sticky;top:0;z-index:20}
+#brand{font-weight:900;font-size:19px;border:0;background:none;color:var(--ink);cursor:pointer;letter-spacing:-.02em}
+#brand span{background:linear-gradient(90deg,var(--primary),var(--primary2));-webkit-background-clip:text;color:transparent}
+#dark{margin-left:auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:9px 12px;cursor:pointer}
+.progressWrap{height:8px;background:var(--line);border-radius:999px;flex:1;max-width:420px;overflow:hidden}
+#progress{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary2));transition:.3s}
+
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 72px)}
+aside{background:var(--surface);backdrop-filter:blur(12px);border-right:1px solid var(--line);padding:18px 14px;
+position:sticky;top:72px;height:calc(100vh - 72px);overflow:auto}
+aside>button,.chapters button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;color:var(--muted);
+text-align:left;padding:11px 12px;border-radius:14px;margin:3px 0;cursor:pointer;transition:.18s}
+.chapters{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.chapters button{font-size:13px}
+.chapters button.done:after{content:"✓";margin-left:auto;color:var(--green);font-weight:900}
+aside button:hover,aside button.active{background:var(--soft);color:var(--primary);font-weight:800}
+
+main{padding:36px 40px 70px;max-width:1280px;width:100%}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+.card{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.hero .card:first-child{padding:34px;background:
+linear-gradient(135deg,rgba(91,92,240,.11),rgba(124,58,237,.08)),var(--card)}
+.eyebrow{font-size:12px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.11em}
+h1{font-size:44px;line-height:1.08;margin:10px 0 14px;letter-spacing:-.035em}
+h2{font-size:22px;margin:0 0 14px;letter-spacing:-.015em}
+h3{margin:8px 0 8px;letter-spacing:-.01em}
+.muted{color:var(--muted);line-height:1.75}
+.btn{border:0;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:11px 16px;border-radius:14px;
+cursor:pointer;font-weight:800;box-shadow:0 8px 20px rgba(91,92,240,.18)}
+.btn.secondary{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.step{cursor:pointer;transition:.18s;min-height:170px;position:relative;overflow:hidden}
+.step:before{content:"";position:absolute;width:110px;height:110px;border-radius:50%;right:-34px;top:-34px;background:rgba(91,92,240,.07)}
+.step:hover{border-color:#c9c7ff;transform:translateY(-3px);box-shadow:0 16px 36px rgba(30,41,59,.10)}
+.tag{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:12px;color:var(--muted);margin:3px;background:var(--card)}
+
+.lessonGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.callout{background:linear-gradient(135deg,rgba(91,92,240,.09),rgba(124,58,237,.06));border:1px solid rgba(91,92,240,.16);
+padding:16px;border-radius:16px;margin:15px 0}
+.analogy{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);padding:16px;border-radius:16px;margin:15px 0}
+.diagram{background:
+linear-gradient(180deg,rgba(91,92,240,.07),rgba(255,255,255,0));border:1px solid var(--line);border-radius:22px;padding:20px;min-height:310px}
+.diagram svg{width:100%;height:auto}.hot{cursor:pointer;transition:.15s}.hot:hover{filter:brightness(.97)}
+.infoBox{margin-top:12px;min-height:72px;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.flow .node{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-weight:800;box-shadow:0 4px 12px rgba(30,41,59,.04)}
+.arrow{color:var(--muted)}
+.detail li{margin:9px 0;line-height:1.65}
+.quiz button{display:block;width:100%;margin:8px 0;text-align:left;padding:12px 13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;cursor:pointer}
+.quiz button:hover{border-color:#c9c7ff;background:var(--soft)}
+.quiz button.ok{border-color:#22c55e;background:rgba(34,197,94,.09)}
+.quiz button.no{border-color:#ef4444;background:rgba(239,68,68,.08)}
+
+.termGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.termCard{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:16px;cursor:pointer;transition:.16s}
+.termCard:hover{border-color:#c9c7ff;transform:translateY(-2px)}
+.pathline{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.pathnode{border:1px solid var(--line);background:var(--card);padding:12px 15px;border-radius:14px;cursor:pointer;font-weight:750}
+.lab{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}.good{border-top:4px solid var(--green)}.bad{border-top:4px solid var(--red)}
+
+@media(max-width:980px){
+ .shell{grid-template-columns:1fr}.hero,.lessonGrid,.lab{grid-template-columns:1fr}
+ aside{position:static;height:auto;display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}
+ aside>button{width:auto;white-space:nowrap}.chapters{display:none}.steps{grid-template-columns:1fr 1fr}
+ main{padding:24px}.termGrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+ header{padding:0 14px}.progressWrap{display:none}main{padding:18px}
+ h1{font-size:34px}.steps,.compare{grid-template-columns:1fr}.termGrid{grid-template-columns:1fr}
+ .hero .card:first-child{padding:24px}
+}
+
+</style></head>
+<body><header><button id="brand">BIOS <span>0→1</span></button><div class="progressWrap"><div id="progress"></div></div><button id="dark">◐</button></header>
+<div class="shell"><aside><button data-view="home" class="active">🏠 開始</button><button data-view="path">🧭 學習路徑</button><button data-view="glossary">Aa 名詞庫</button><button data-view="playground">🧪 互動實驗室</button><div class="chapters" id="chapterNav"></div></aside><main id="app"></main></div>
+<script>
+window.COURSE=[
+  {
+    "id": "ch1",
+    "n": "01",
+    "title": "先看懂一台電腦",
+    "subtitle": "CPU、RAM、SPI Flash、Storage、PCH/SoC 到底各自在做什麼？",
+    "one": "先把電腦想成一間公司：CPU 是總經理、RAM 是辦公桌、Storage 是檔案櫃、BIOS/UEFI 是開門後第一個上班的人。",
+    "analogy": "公司開門前，桌椅、檔案櫃、網路與門禁都存在，但還沒準備好工作；Firmware 的工作就是把它們依序準備好。",
+    "terms": [
+      "CPU",
+      "RAM",
+      "SPI Flash",
+      "SSD",
+      "PCH / SoC",
+      "EC"
+    ],
+    "diagram": "pc",
+    "detail": [
+      "CPU 執行 Firmware、OS 與應用程式。",
+      "RAM 是執行中的工作記憶體，斷電資料消失。",
+      "SPI Flash 儲存 BIOS/UEFI Firmware。",
+      "SSD/HDD 儲存 OS 與使用者資料。",
+      "PCH/SoC 連接與管理大量 I/O。",
+      "EC 常負責 Keyboard、Fan、Battery、Power Button。"
+    ],
+    "work": "遇到裝置不見時，先問『它掛在哪裡？由誰初始化？』比直接問『是不是 BIOS bug？』更有效。",
+    "quiz": {
+      "q": "哪一個元件最像『辦公桌』，讓 CPU 暫時放正在使用的資料？",
+      "opts": [
+        "RAM",
+        "SPI Flash",
+        "SSD"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch2",
+    "n": "02",
+    "title": "BIOS / UEFI 到底是什麼？",
+    "subtitle": "它不是一個 Setup 畫面，而是一套讓平台從『剛通電』變成『OS 可接手』的 Firmware。",
+    "one": "BIOS/UEFI 是電腦開機後最早執行的一層 Firmware。",
+    "analogy": "像飯店早班經理：先確認房間、電梯、門禁、櫃台都可用，再把整間飯店交給白天營運團隊。",
+    "terms": [
+      "BIOS",
+      "UEFI",
+      "Firmware",
+      "POST",
+      "Setup"
+    ],
+    "diagram": "bios",
+    "detail": [
+      "現代 PC 大多採 UEFI 架構，但工作上仍常統稱 BIOS。",
+      "Firmware 存在 SPI Flash 中，由 CPU 在 Power On 後執行。",
+      "BIOS Setup 只是其中一個 UI，不等於 BIOS 全部。",
+      "Firmware 會初始化硬體、建立 Boot path、準備 OS 所需資訊。"
+    ],
+    "work": "如果客戶說『BIOS 畫面沒問題但 Windows 進不去』，代表問題不一定在最早期 Firmware phase。",
+    "quiz": {
+      "q": "BIOS Setup 和 BIOS/UEFI 的關係？",
+      "opts": [
+        "Setup 只是 Firmware 的一個介面",
+        "Setup 就是全部 BIOS",
+        "Setup 是 Windows App"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch3",
+    "n": "03",
+    "title": "按下 Power 後發生什麼？",
+    "subtitle": "先理解整個故事，再去背 SEC / PEI / DXE / BDS。",
+    "one": "Power On 後，Firmware 會把硬體從 Reset/Unknown state 一步一步變成可用。",
+    "analogy": "像開店：先通電 → 打開工作區 → 把設備叫醒 → 決定今天從哪個入口營業 → 正式交給營運。",
+    "terms": [
+      "Power On",
+      "Reset",
+      "Initialization",
+      "Boot",
+      "OS Loader"
+    ],
+    "diagram": "story",
+    "detail": [
+      "通電不代表硬體已經能可靠使用。",
+      "RAM、USB、NVMe、Display 等都需要初始化。",
+      "完成後 Firmware 才能找到可開機的裝置並載入 OS Loader。"
+    ],
+    "work": "看到黑屏、SSD 不見、Boot option 不見時，真正要問的是『哪一步還沒完成？』。",
+    "quiz": {
+      "q": "為什麼 Power On 後還需要 Initialization？",
+      "opts": [
+        "硬體存在但尚未完整設定",
+        "因為 Windows 一定先啟動",
+        "只是為了顯示 Logo"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch4",
+    "n": "04",
+    "title": "UEFI Boot Flow",
+    "subtitle": "SEC → PEI → DXE → BDS → OS Loader，一次看懂。",
+    "one": "一句話：SEC 先能跑 → PEI 把 RAM 建起來 → DXE 把硬體叫醒 → BDS 找 Boot Device → OS 接手。",
+    "analogy": "像接力賽，每一棒都把已完成的環境交給下一棒。",
+    "terms": [
+      "SEC",
+      "PEI",
+      "DXE",
+      "BDS",
+      "ExitBootServices"
+    ],
+    "diagram": "boot",
+    "detail": [
+      "SEC：建立最基本 execution environment。",
+      "PEI：Memory Initialization / Training。",
+      "DXE：PCIe、USB、NVMe、Display 等大量初始化。",
+      "BDS：選擇 BootOrder / BootNext 指向的開機目標。",
+      "OS Loader：載入 OS，之後由 OS 正式接管。"
+    ],
+    "work": "非常早期黑屏偏 SEC/PEI；POST 中裝置不見偏 DXE；裝置看得到但 Boot Option 不對偏 BDS。",
+    "quiz": {
+      "q": "大量 PCIe / USB / NVMe 初始化通常落在哪個 phase？",
+      "opts": [
+        "DXE",
+        "SEC",
+        "S5"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch5",
+    "n": "05",
+    "title": "裝置是怎麼『被看到』的？",
+    "subtitle": "PCIe / USB / NVMe Enumeration 白話版。",
+    "one": "硬體插著，不代表 Firmware 已經知道它是誰、在哪裡、怎麼用。",
+    "analogy": "像新員工報到：要先到場、拿到座位、登記資料、領權限，才算正式可工作。",
+    "terms": [
+      "Enumeration",
+      "PCIe",
+      "NVMe",
+      "USB",
+      "Device Path",
+      "Block I/O"
+    ],
+    "diagram": "enum",
+    "detail": [
+      "PCIe device 需要 link、bus scan、resource configuration。",
+      "NVMe controller 被看到後，還要有 NVMe driver/protocol 才能形成可用 storage。",
+      "UEFI 會建立 Device Path 與對應 protocol。",
+      "有 Controller 不等於已經有可開機 Block I/O。"
+    ],
+    "work": "SSD 問題先分三層：BIOS Setup 看不到？UEFI Shell 看不到？還是只有 OS 看不到？",
+    "quiz": {
+      "q": "BIOS 已看到 NVMe Controller，就一定代表可 Boot 嗎？",
+      "opts": [
+        "不一定，還需 storage protocol / boot path",
+        "一定",
+        "只要是 M.2 就一定"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch6",
+    "n": "06",
+    "title": "Storage 不要再混淆",
+    "subtitle": "HDD / SSD / SATA / PCIe / NVMe / M.2 放在一張圖裡。",
+    "one": "M.2 是外型/Connector；NVMe 是 Protocol；PCIe 是高速連線；SSD/HDD 是儲存裝置類型。",
+    "analogy": "像交通：M.2 是停車位規格、PCIe/SATA 是道路、NVMe 是交通規則、SSD 是車。",
+    "terms": [
+      "HDD",
+      "SSD",
+      "SATA",
+      "PCIe",
+      "NVMe",
+      "M.2"
+    ],
+    "diagram": "storage",
+    "detail": [
+      "HDD：機械式磁碟。",
+      "SSD：使用 Flash 的固態儲存。",
+      "SATA：傳統 storage interface。",
+      "PCIe：高速通用 interconnect。",
+      "NVMe：針對 non-volatile memory 的 protocol，常跑在 PCIe 上。",
+      "M.2：外型與 connector 規格，不等於 NVMe。"
+    ],
+    "work": "客戶說『M.2 SSD』時，仍要確認它實際走 PCIe/NVMe 還是 SATA。",
+    "quiz": {
+      "q": "M.2 最準確的描述是？",
+      "opts": [
+        "外型 / connector 規格",
+        "等於 NVMe protocol",
+        "等於 PCIe bus"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch7",
+    "n": "07",
+    "title": "Firmware 怎麼把平台交給 OS？",
+    "subtitle": "UEFI Protocol、ACPI、SMBIOS、ExitBootServices。",
+    "one": "Firmware 不只把硬體叫醒，還要把『這台機器是什麼、有哪些裝置、怎麼管電源』告訴 OS。",
+    "analogy": "像交班表：白班接手前，要知道設備位置、值班狀態、規則與待處理事項。",
+    "terms": [
+      "UEFI Protocol",
+      "ACPI",
+      "SMBIOS",
+      "ExitBootServices",
+      "Runtime"
+    ],
+    "diagram": "handoff",
+    "detail": [
+      "UEFI Protocol 讓 pre-OS 階段能以標準方式存取裝置。",
+      "ACPI 描述裝置、電源與 platform control。",
+      "SMBIOS 提供系統硬體資訊。",
+      "ExitBootServices 是 OS Loader 結束 UEFI Boot Services 的重要分界。"
+    ],
+    "work": "Windows Logo 後才 hang，通常不能只盯 SEC/PEI；要考慮 OS Loader、driver、ACPI 與 handoff。",
+    "quiz": {
+      "q": "哪一個最像 Firmware 與 OS 的『電源/裝置說明書』？",
+      "opts": [
+        "ACPI",
+        "SPI Flash",
+        "M.2"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch8",
+    "n": "08",
+    "title": "睡眠、休眠、關機",
+    "subtitle": "S0ix / S3 / S4 / S5 先從生活情境理解。",
+    "one": "不同 Power State 的差別，是『哪些東西還活著、資料放哪裡、醒來多快』。",
+    "analogy": "S0ix 像手機熄屏待機；S3 像趴桌睡覺；S4 像把工作存檔後回家；S5 像公司關門但門禁還有待機電。",
+    "terms": [
+      "S0ix",
+      "S3",
+      "S4",
+      "S5",
+      "C-state",
+      "D-state"
+    ],
+    "diagram": "power",
+    "detail": [
+      "S0ix：系統仍在 S0，但大量元件進入低功耗。",
+      "S3：Suspend to RAM。",
+      "S4：Hibernate，記憶體內容寫入 storage。",
+      "S5：Soft Off，仍可能保留待機電。",
+      "CPU 有 C-state，Device 也可能有 D-state。"
+    ],
+    "work": "Modern Standby issue 要分『OS 以為睡了』和『硬體真的進低功耗』，SleepStudy/HW residency 常用來看落差。",
+    "quiz": {
+      "q": "Modern Standby 最相關的是哪一類狀態？",
+      "opts": [
+        "S0ix",
+        "S5",
+        "G3"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch9",
+    "n": "09",
+    "title": "Security 基礎",
+    "subtitle": "Secure Boot、TPM、PCR、BitLocker 不再混在一起。",
+    "one": "Secure Boot 管『能不能信任並執行』；TPM/PCR 管『開機時量測了什麼』。",
+    "analogy": "Secure Boot 像門口驗證員；TPM/PCR 像不可任意改寫的簽到紀錄。",
+    "terms": [
+      "Secure Boot",
+      "TPM",
+      "PCR",
+      "Measured Boot",
+      "BitLocker"
+    ],
+    "diagram": "security",
+    "detail": [
+      "Secure Boot 驗證執行元件的簽章與信任鏈。",
+      "Measured Boot 將量測延伸到 TPM PCR。",
+      "BitLocker 可依 PCR 狀態決定是否要求 Recovery。"
+    ],
+    "work": "看到 BitLocker Recovery，不代表一定是 Secure Boot key 問題；先確認哪個 PCR 改變以及 TPM 狀態。",
+    "quiz": {
+      "q": "PCR 最接近哪個概念？",
+      "opts": [
+        "量測累積紀錄",
+        "BIOS image 儲存區",
+        "Boot menu"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch10",
+    "n": "10",
+    "title": "Firmware 生態系與責任邊界",
+    "subtitle": "IBV、Silicon Vendor、EC、ME、PSP、FSP、IFWI。",
+    "one": "BIOS 專案不是只有一包 code；它是多個 Firmware、Silicon package、OEM policy 與 OS 的整合。",
+    "analogy": "像大型建案：建築師、結構、機電、門禁、家具都不同供應者，最後仍要整合成一棟能住的房子。",
+    "terms": [
+      "IBV",
+      "FSP",
+      "ME / CSME",
+      "PSP",
+      "IFWI",
+      "EC"
+    ],
+    "diagram": "ecosystem",
+    "detail": [
+      "IBV 負責 UEFI framework、feature integration 與 project customization。",
+      "Intel 平台常見 FSP、ME/CSME、IFWI。",
+      "AMD 平台常見 PSP、AGESA/PI。",
+      "EC 是獨立 controller firmware。"
+    ],
+    "work": "Reference BIOS/CRB 的價值是 baseline；它能縮小差異，但不能單獨證明『一定不是 IBV』。",
+    "quiz": {
+      "q": "CRB / Reference BIOS pass 最合理的解讀？",
+      "opts": [
+        "它是一個縮小範圍的 baseline evidence",
+        "一定不是 IBV",
+        "一定是 Hardware"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch11",
+    "n": "11",
+    "title": "公版 / CRB / RVP vs Project Board",
+    "subtitle": "為什麼 IBV 一直保留公版？Project Board 出問題時，公版到底拿來做什麼？",
+    "one": "CRB/RVP 是 IBV 長期使用的 baseline / control group；Project Board 是加入 OEM/ODM 客製、實際 HW 與 Device 後的產品環境。",
+    "analogy": "像做實驗：公版是控制組，Project Board 是加入各種客製條件的實驗組。兩邊結果不同，重點不是立刻判誰錯，而是找出中間的 Delta。",
+    "terms": [
+      "CRB",
+      "RVP",
+      "Project Board",
+      "Baseline",
+      "Reference BIOS",
+      "Delta"
+    ],
+    "diagram": "baseline",
+    "detail": [
+      "CRB / RVP 可作為 Development、Validation、Regression、Issue Reproduction 與 Responsibility Baseline。",
+      "Project Board 通常包含 Project BIOS、OEM/ODM customization、實際 EC、HW design、Device configuration。",
+      "Project Board Fail、CRB Pass：Project-specific Delta 嫌疑提高，但不能直接說『一定不是 BIOS』。",
+      "Project Board Fail、CRB Fail：Common code / Silicon integration path 嫌疑提高。",
+      "若 IBV CRB Fail、Silicon Vendor Reference BIOS Pass：IBV implementation / integration 嫌疑提高。",
+      "真正要比較的是 BIOS customization、PCD、ACPI、EC/FW、Board HW、Device / IHV 等差異。"
+    ],
+    "work": "客戶 Project Board 出現 issue 時，先建立同版本、同條件的 baseline，再比較 CRB / RVP / Silicon Vendor Reference 結果。公版的用途是縮小範圍與找 owner，不是拿來直接 close issue。",
+    "quiz": {
+      "q": "Project Board Fail，但 CRB Pass，最合理的第一個判斷是？",
+      "opts": [
+        "Project-specific Delta 嫌疑提高，要繼續比 BIOS/PCD/ACPI/EC/HW/Device 差異",
+        "一定不是 BIOS 問題",
+        "一定是 Hardware 問題"
+      ],
+      "ans": 0
+    }
+  },
+  {
+    "id": "ch11",
+    "n": "12",
+    "title": "最後才學 PM Issue Triage",
+    "subtitle": "從 Symptom → Baseline → Scope → Owner → Validation。",
+    "one": "PM 的價值不是把問題轉寄，而是把『未知』逐步縮小成可驗證的範圍。",
+    "analogy": "像醫生問診：先看症狀、比對正常值、縮小範圍，再決定要找哪個專科。",
+    "terms": [
+      "Symptom",
+      "Baseline",
+      "Scope",
+      "Owner",
+      "Workaround",
+      "Validation"
+    ],
+    "diagram": "triage",
+    "detail": [
+      "Symptom：明確描述發生什麼。",
+      "Baseline：CRB/Reference BIOS/舊版是否正常。",
+      "Scope：哪些平台、版本、Device 會發生。",
+      "Owner：根據 evidence 判斷下一個分析團隊。",
+      "Validation：Patch/WA/Fix 後以固定 steps 驗證。"
+    ],
+    "work": "真正有用的 status 應回答：現在知道什麼？還不知道什麼？下一個驗證動作是什麼？誰負責？",
+    "quiz": {
+      "q": "Issue triage 的第一個重點？",
+      "opts": [
+        "把 Symptom 與 reproduce 定義清楚",
+        "先決定誰的責任",
+        "先貼全部 log"
+      ],
+      "ans": 0
+    }
+  }
+];
+</script>
+<script>
+
+const C=window.COURSE||[]; const app=document.getElementById('app'); const completed=new Set(JSON.parse(localStorage.getItem('bios01done')||'[]'));
+const infos={
+"CPU":"CPU 執行 Firmware 與 OS，是系統主要運算核心。","RAM":"RAM 是執行中資料的工作區，斷電資料消失。","SPI Flash":"SPI Flash 儲存 BIOS/UEFI Firmware。","SSD":"SSD 儲存 OS 與資料，不是 BIOS 執行中的工作記憶體。",
+"PCH / SoC":"PCH/SoC 是大量 I/O 與 controller 的平台樞紐。","EC":"EC 常負責電源鍵、風扇、電池、鍵盤等 Notebook 控制。"
+};
+function prog(){document.getElementById('progress').style.width=(completed.size/C.length*100)+'%';document.querySelectorAll('.chapters button').forEach((b,i)=>b.classList.toggle('done',completed.has(C[i].id)))}
+function nav(){document.getElementById('chapterNav').innerHTML=C.map(x=>`<button data-id="${x.id}">${x.n} ${x.title}</button>`).join('');document.querySelectorAll('.chapters button').forEach(b=>b.onclick=()=>lesson(b.dataset.id));prog()}
+document.querySelectorAll('aside>button').forEach(b=>b.onclick=()=>view(b.dataset.view));document.getElementById('brand').onclick=()=>view('home');document.getElementById('dark').onclick=()=>document.body.classList.toggle('dark');
+function active(v){document.querySelectorAll('aside>button').forEach(b=>b.classList.toggle('active',b.dataset.view===v))}
+function view(v){active(v); if(v==='home')home(); if(v==='path')path(); if(v==='glossary')glossary(); if(v==='playground')playground();window.scrollTo(0,0)}
+function home(){app.innerHTML=`<section class="hero"><div class="card"><div class="eyebrow">Beginner First</div><h1>第一次碰 BIOS，也可以從 0 開始。</h1><p class="muted">這不是名詞百科。你會先看懂一台電腦，再跟著 Power On 的故事走進 BIOS/UEFI；等建立心智模型後，才學 DXE、S0ix、TPM 與 Issue Triage。</p><button class="btn" onclick="lesson('ch1')">從第 1 章開始</button></div><div class="card"><h2>學習進度</h2><div style="font-size:46px;font-weight:900">${completed.size}/${C.length}</div><p class="muted">每章：看圖 → 白話 → 點擊探索 → Detail → 工作情境 → Quiz</p></div></section>
+<section style="margin-top:22px"><h2>先不要背名詞，先建立故事</h2><div class="steps">${C.slice(0,6).map(x=>`<div class="card step" onclick="lesson('${x.id}')"><div class="eyebrow">Chapter ${x.n}</div><h3>${x.title}</h3><div class="muted">${x.subtitle}</div></div>`).join('')}</div></section>`}
+function path(){app.innerHTML=`<div class="eyebrow">0 → 1 Roadmap</div><h1>學習路徑</h1><p class="muted">順序不是照專有名詞分類，而是照『新人腦中會產生的問題』排列。</p><div class="card"><div class="pathline">${C.map((x,i)=>`<button class="pathnode" onclick="lesson('${x.id}')">${x.n} ${x.title}</button>${i<C.length-1?'<span class="arrow">→</span>':''}`).join('')}</div></div>`}
+function glossary(){const terms=[...new Set(C.flatMap(x=>x.terms))].sort(); app.innerHTML=`<div class="eyebrow">Glossary</div><h1>名詞庫</h1><p class="muted">名詞庫是『查詢』，不是『學習順序』。點名詞會看到它在哪些章出現。</p><div class="termGrid">${terms.map(t=>`<div class="termCard" onclick="showTerm('${t.replaceAll("'","\'")}')"><b>${t}</b></div>`).join('')}</div><div id="termInfo" class="card" style="margin-top:16px;display:none"></div>`}
+window.showTerm=t=>{const xs=C.filter(x=>x.terms.includes(t));const el=document.getElementById('termInfo');el.style.display='block';el.innerHTML=`<h2>${t}</h2><p class="muted">出現在：${xs.map(x=>x.title).join('、')}</p><button class="btn secondary" onclick="lesson('${xs[0].id}')">去第一個相關章節</button>`;el.scrollIntoView({behavior:'smooth'})}
+function playground(){app.innerHTML=`<div class="eyebrow">Interactive Lab</div><h1>用互動確認你真的懂了</h1><div class="lab">
+<div class="card"><h2>Normal vs Fail</h2><p class="muted">如果 SSD 實體存在，但 Firmware 沒完成 NVMe enumeration：</p><div class="compare"><div class="card good"><b>Normal</b><p>PCIe Link → Controller → NVMe Protocol → Block I/O → Boot Option</p></div><div class="card bad"><b>Fail</b><p>Controller 存在，但沒有可用 Block I/O → BDS 找不到可 Boot Storage</p></div></div></div>
+<div class="card"><h2>你會先問什麼？</h2><p class="muted">情境：客戶說「M.2 SSD 在 Windows 看不到」。</p><button class="btn secondary" onclick="labAns('Setup / UEFI Shell / OS 三層都要確認，先判斷 Firmware 是否看得到。')">直接問 BIOS bug 嗎？</button><button class="btn secondary" onclick="labAns('對。先確認 BIOS Setup、UEFI Shell、OS 各自能不能看到，才能縮小範圍。')">先分 BIOS / Shell / OS</button><div id="labout" class="callout" style="display:none"></div></div></div>`}
+window.labAns=x=>{const e=document.getElementById('labout');e.style.display='block';e.textContent=x}
+function diagram(type){
+ if(type==='pc')return `<svg viewBox="0 0 760 330"><g font-family="sans-serif" font-size="16" text-anchor="middle">
+ <rect x="300" y="20" width="160" height="58" rx="14" fill="#eef3ff" stroke="#315bea" class="hot" onclick="hot('CPU')"/><text x="380" y="55">CPU / SoC</text>
+ <rect x="70" y="120" width="150" height="60" rx="14" fill="#fff" stroke="#b8c2d8" class="hot" onclick="hot('SPI Flash')"/><text x="145" y="155">SPI Flash</text>
+ <rect x="305" y="120" width="150" height="60" rx="14" fill="#fff" stroke="#b8c2d8" class="hot" onclick="hot('RAM')"/><text x="380" y="155">RAM</text>
+ <rect x="540" y="120" width="150" height="60" rx="14" fill="#fff" stroke="#b8c2d8" class="hot" onclick="hot('PCH / SoC')"/><text x="615" y="155">PCH / I/O</text>
+ <rect x="170" y="240" width="150" height="60" rx="14" fill="#fff" stroke="#b8c2d8" class="hot" onclick="hot('SSD')"/><text x="245" y="275">SSD / HDD</text>
+ <rect x="440" y="240" width="150" height="60" rx="14" fill="#fff" stroke="#b8c2d8" class="hot" onclick="hot('EC')"/><text x="515" y="275">EC</text>
+ <path d="M380 78 L380 120 M300 150 L220 150 M455 150 L540 150 M575 180 L515 240 M545 180 L280 240" stroke="#98a2b3" fill="none" stroke-width="2"/></g></svg>`;
+ const maps={bios:["Power On","CPU starts Firmware","Hardware Init","Boot Device","OS"],
+ story:["Power On","Basic Execution","Memory Ready","Devices Ready","Choose Boot","OS"],
+ boot:["SEC","PEI","DXE","BDS","OS Loader"],
+ enum:["Power / Reset","Link / Detect","Enumeration","Driver / Protocol","Device Path","Boot / OS"],
+ storage:["Device: SSD","Form: M.2","Bus: PCIe","Protocol: NVMe"],
+ handoff:["UEFI Services","ACPI / SMBIOS","OS Loader","ExitBootServices","OS Runtime"],
+ power:["S0 Active","S0ix","S3","S4","S5"],
+ security:["Signed Component","Secure Boot","Measurement","TPM PCR","BitLocker Policy"],
+ ecosystem:["Silicon Vendor","IBV UEFI","OEM Policy","EC / Device FW","OS"],
+ baseline:["Silicon Vendor Reference","IBV CRB / RVP","Customer Project Board","Customer Issue","Compare Delta"],
+ triage:["Symptom","Reproduce","Baseline","Scope","Owner","Fix / WA","Validation"]};
+ const arr=maps[type]||[];return `<div class="flow">${arr.map((x,i)=>`<span class="node">${x}</span>${i<arr.length-1?'<span class="arrow">→</span>':''}`).join('')}</div>`;
+}
+window.hot=k=>document.getElementById('hotinfo').textContent=infos[k]||k;
+function lesson(id){active('');const x=C.find(z=>z.id===id);app.innerHTML=`<div class="eyebrow">Chapter ${x.n}</div><h1>${x.title}</h1><p class="muted">${x.subtitle}</p><div class="lessonGrid">
+<div><div class="card"><h2>一句話先懂</h2><div class="callout">${x.one}</div><h2>用比喻記</h2><div class="analogy">${x.analogy}</div><h2>技術 Detail</h2><ul class="detail">${x.detail.map(d=>`<li>${d}</li>`).join('')}</ul></div></div>
+<div><div class="diagram"><h2>看圖理解</h2>${diagram(x.diagram)}<div id="hotinfo" class="infoBox">${x.diagram==='pc'?'點圖中的元件看看。':'先看整體流程，不用急著背縮寫。'}</div></div><div class="card" style="margin-top:14px"><h3>這章只要記這些名詞</h3>${x.terms.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></div>
+<div class="card" style="margin-top:18px"><h2>工作上會在哪裡遇到？</h2><p class="muted">${x.work}</p></div>
+${x.id==='ch11'?baselineLab():''}
+<div class="card quiz" style="margin-top:18px"><h2>Quick Quiz</h2><b>${x.quiz.q}</b>${x.quiz.opts.map((o,i)=>`<button onclick="answer(this,${i===x.quiz.ans},'${x.id}')">${o}</button>`).join('')}<div class="muted result"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:18px">${prevNext(x)}</div>`;window.scrollTo(0,0)}
+
+function baselineLab(){
+ return `<div class="card" style="margin-top:18px">
+ <div class="eyebrow">Interactive Comparison</div><h2>CRB / RVP vs Project Board</h2>
+ <div class="compare">
+   <div class="card good"><b>IBV CRB / RVP</b><p class="muted">較乾淨的 baseline<br>Common code / Silicon integration<br>用來 Reproduce / Regression / Compare</p></div>
+   <div class="card"><b>Customer Project Board</b><p class="muted">Project BIOS<br>OEM/ODM customization<br>實際 EC / HW / Device configuration</p></div>
+ </div>
+ <h3 style="margin-top:18px">選一組結果看看 PM 應該先想什麼：</h3>
+ <button class="btn secondary" style="margin:4px" onclick="baselineAns('crbpass')">CRB Pass / Project Fail</button>
+ <button class="btn secondary" style="margin:4px" onclick="baselineAns('bothfail')">CRB Fail / Project Fail</button>
+ <button class="btn secondary" style="margin:4px" onclick="baselineAns('ibvfailrefpass')">IBV CRB Fail / SV Reference Pass</button>
+ <div id="baselineOut" class="callout" style="display:none;margin-top:12px"></div>
+ </div>`;
+}
+window.baselineAns=k=>{
+ const map={
+  crbpass:"Project-specific Delta 嫌疑提高。優先比較 Project BIOS / PCD / ACPI / EC / HW / Device。注意：CRB Pass 不等於『不是 BIOS issue』。",
+  bothfail:"Common / Silicon integration path 嫌疑提高。優先看 IBV Common Feature、Chipset integration、Silicon package，再和 SV Reference 比。",
+  ibvfailrefpass:"IBV implementation / integration 嫌疑提高。可聚焦 IBV Common code、Feature integration、silicon package integration 差異。"
+ };
+ const e=document.getElementById('baselineOut');e.style.display='block';e.textContent=map[k];
+};
+
+function prevNext(x){const i=C.indexOf(x);return `${i?`<button class="btn secondary" onclick="lesson('${C[i-1].id}')">← 上一章</button>`:'<span></span>'}${i<C.length-1?`<button class="btn" onclick="lesson('${C[i+1].id}')">下一章 →</button>`:`<button class="btn" onclick="view('playground')">進入互動實驗室</button>`}`}
+window.answer=(btn,ok,id)=>{const q=btn.parentElement;q.querySelectorAll('button').forEach(b=>b.disabled=true);btn.classList.add(ok?'ok':'no');q.querySelector('.result').textContent=ok?'✅ 正確。這章完成！':'❌ 再回看上方圖解與一句話。';if(ok){completed.add(id);localStorage.setItem('bios01done',JSON.stringify([...completed]));prog()}}
+nav();home();
+
+</script></body></html>
